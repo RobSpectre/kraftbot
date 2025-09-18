@@ -100,14 +100,14 @@ Format responses clearly with bullet points."""
         """
         try:
             result = await self.agent.run(prompt)
-            
+
             # Handle potential method vs property issue with result.output
             output_text = result.output
             if callable(output_text):
                 output_text = output_text()
-            
+
             return AgentResponse(response=str(output_text))
-                
+
         except Exception as e:
             # Provide more helpful error messages
             error_msg = str(e)
@@ -117,5 +117,25 @@ Format responses clearly with bullet points."""
                 error_msg = f"API Response Error: {error_msg}"
             elif "api key" in error_msg.lower():
                 error_msg = "API Key Error: Please check your OpenRouter API key is valid and has sufficient credits."
-            
+
             return AgentResponse(response=f"Error: {error_msg}")
+
+    async def run_stream(self, prompt: str, user_id: str = "user", session_id: str = "default"):
+        """
+        Run the agent with streaming output
+        """
+        try:
+            async with self.agent.run_stream(prompt) as stream:
+                async for token in stream:
+                    yield token
+        except Exception as e:
+            # Provide more helpful error messages
+            error_msg = str(e)
+            if "finish_reason" in error_msg and "error" in error_msg:
+                error_msg = "API Error: The model service returned an error response. This could be due to API limits, model availability, or service issues. Please try again or use a different model."
+            elif "validation error" in error_msg.lower():
+                error_msg = f"API Response Error: {error_msg}"
+            elif "api key" in error_msg.lower():
+                error_msg = "API Key Error: Please check your OpenRouter API key is valid and has sufficient credits."
+
+            yield f"Error: {error_msg}"
