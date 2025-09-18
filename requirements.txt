@@ -1,0 +1,19 @@
+# PydanticAI with MCP support
+pydantic-ai-slim[mcp]
+
+# Required for OpenRouter integration
+httpx
+
+# Enhanced logging and observability
+logfire
+
+# CLI framework and rich formatting
+typer[all]
+rich
+
+# Optional: For development and testing
+pytest
+pytest-asyncio
+
+# Optional: For enhanced shell features
+click-completion
