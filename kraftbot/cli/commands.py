@@ -7,7 +7,9 @@ import time
 from typing import List, Optional
 
 import typer
-from rich.prompt import Prompt
+from prompt_toolkit import prompt
+from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.styles import Style
 from rich.status import Status
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
 from rich.panel import Panel
@@ -21,6 +23,41 @@ from .utils import console, print_banner, check_environment, display_response, d
 
 # Global agent instance
 agent: Optional[PydanticAIAgent] = None
+
+
+async def display_streaming_response(user_input: str, agent: PydanticAIAgent, user_id: str, session_id: str, start_time: float):
+    """Display streaming response with markdown formatting"""
+    from rich.live import Live
+    from rich.markdown import Markdown
+    from rich.panel import Panel
+
+    accumulated_text = ""
+
+    console.print("🧠 [cyan]KraftBot:[/cyan]")
+
+    with Live(refresh_per_second=10, console=console) as live:
+        try:
+            async for token in agent.run_stream(user_input, user_id, session_id):
+                accumulated_text += str(token)
+
+                # Display current markdown content
+                markdown_content = Markdown(accumulated_text)
+                panel = Panel(
+                    markdown_content,
+                    title=f"Response ({time.time() - start_time:.1f}s)",
+                    border_style="green",
+                    padding=(0, 1)
+                )
+                live.update(panel)
+
+        except Exception as e:
+            console.print(f"❌ [red]Streaming error: {e}[/red]")
+            # Fallback to non-streaming
+            try:
+                response = await agent.run(user_input, user_id, session_id)
+                display_response(response, time.time() - start_time)
+            except Exception as fallback_error:
+                console.print(f"❌ [red]Fallback error: {fallback_error}[/red]")
 
 
 async def initialize_agent(model: str = None, prompt: str = None) -> bool:
@@ -82,7 +119,7 @@ async def initialize_agent(model: str = None, prompt: str = None) -> bool:
     return True
 
 
-def chat(
+async def chat_async(
     model: str = typer.Option(
         None,
         "--model", "-m",
@@ -110,44 +147,76 @@ def chat(
         raise typer.Exit(1)
     
     console.print(Rule("🎯 Interactive Chat Mode", style="bright_cyan"))
-    console.print("[dim]Type 'quit', 'exit', or press Ctrl+C to end the session[/dim]\n")
-    
+    console.print("[dim]Type 'quit', 'exit', or press Ctrl+C to end the session[/dim]")
+    console.print("[dim]Use ↑/↓ arrow keys to navigate command history[/dim]\n")
+
     session_id = f"chat_{int(time.time())}"
     message_count = 0
     user_id = user_id or settings.default_user_id
-    
+
+    # Create command history
+    history = InMemoryHistory()
+
+    # Define style for prompt
+    prompt_style = Style.from_dict({
+        'prompt': '#00aa00 bold',  # Green and bold
+        'count': '#666666',       # Gray
+    })
+
     try:
         while True:
-            # Interactive prompt
-            user_input = Prompt.ask(
-                f"[bold cyan]You[/bold cyan] [dim]({message_count + 1})[/dim]",
-                console=console
-            ).strip()
+            # Interactive prompt with history support
+            try:
+                user_input = prompt(
+                    f"You ({message_count + 1}): ",
+                    history=history,
+                    style=prompt_style
+                ).strip()
+            except EOFError:
+                # Handle Ctrl+D
+                console.print("\n👋 [yellow]Thanks for chatting with KraftBot![/yellow]")
+                break
             
             if user_input.lower() in ['quit', 'exit', 'q']:
                 console.print("\n👋 [yellow]Thanks for chatting with KraftBot![/yellow]")
                 break
-                
+
             if not user_input:
                 continue
             
-            # Thinking animation with progress
+            # Stream response
             start_time = time.time()
-            with Status("🤔 KraftBot is thinking...", console=console, spinner="dots12"):
-                try:
-                    response = asyncio.run(agent.run(user_input, user_id, session_id))
-                    thinking_time = time.time() - start_time
-                    
-                except Exception as e:
-                    console.print(f"❌ [red]Error: {e}[/red]")
-                    continue
-            
-            display_response(response, thinking_time)
+            try:
+                await display_streaming_response(user_input, agent, user_id, session_id, start_time)
+            except Exception as e:
+                console.print(f"❌ [red]Error: {e}[/red]")
+                continue
             message_count += 1
             console.print()  # Add spacing
             
     except KeyboardInterrupt:
         console.print("\n👋 [yellow]Session ended by user[/yellow]")
+
+
+def chat(
+    model: str = typer.Option(
+        None,
+        "--model", "-m",
+        help="Model to use (defaults to configured default model)"
+    ),
+    prompt: str = typer.Option(
+        None,
+        "--prompt", "-p",
+        help="System prompt name (e.g., 'default', 'aggressive') or file path (e.g., '/path/to/prompt.md')"
+    ),
+    user_id: str = typer.Option(
+        None,
+        "--user", "-u",
+        help="User ID for session tracking (defaults to configured default)"
+    )
+):
+    """🎯 Start an interactive chat session with KraftBot"""
+    asyncio.run(chat_async(model, prompt, user_id))
 
 
 def models():
@@ -188,18 +257,14 @@ def test(
             return False
             
         start_time = time.time()
-        
-        with Status("🔬 Running test...", console=console, spinner="dots8Bit"):
-            try:
-                response = await agent.run(prompt, "test_user", "test_session")
-                thinking_time = time.time() - start_time
-                
-            except Exception as e:
-                console.print(f"❌ [red]Test failed: {e}[/red]")
-                return False
-        
-        console.print("✅ [green]Test completed successfully![/green]\n")
-        display_response(response, thinking_time)
+
+        console.print("🔬 [cyan]Running test...[/cyan]\n")
+        try:
+            await display_streaming_response(prompt, agent, "test_user", "test_session", start_time)
+            console.print("\n✅ [green]Test completed successfully![/green]")
+        except Exception as e:
+            console.print(f"❌ [red]Test failed: {e}[/red]")
+            return False
         return True
     
     success = asyncio.run(run_test())
