@@ -4,60 +4,62 @@ Simplified KraftBot agent implementation.
 
 import asyncio
 import time
-from typing import Optional
 
 # Apply compatibility patch for PydanticAI
 from contextlib import nullcontext
-if not hasattr(asyncio, 'nullcontext'):
+from typing import Optional
+
+if not hasattr(asyncio, "nullcontext"):
     asyncio.nullcontext = nullcontext
 
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 
+from ..config.settings import settings
+from ..mcp.manager import MCPManager
 from .models import AgentResponse
 from .observability import LogfireConfig
-from ..mcp.manager import MCPManager
-from ..config.settings import settings
 
 
 class PydanticAIAgent:
     """
     Simplified KraftBot agent with minimal complexity
     """
-    
-    def __init__(self, 
-                 openrouter_api_key: str, 
-                 model_name: str = "anthropic/claude-3.5-sonnet",
-                 system_prompt: Optional[str] = None,
-                 enable_logfire: bool = True):
+
+    def __init__(
+        self,
+        openrouter_api_key: str,
+        model_name: str = "anthropic/claude-3.5-sonnet",
+        system_prompt: Optional[str] = None,
+        enable_logfire: bool = True,
+    ):
         """
         Initialize the agent with OpenRouter provider
         """
         self.openrouter_api_key = openrouter_api_key
         self.model_name = model_name
-        
+
         # Initialize Logfire if enabled
         self.logfire = None
         if enable_logfire:
             try:
                 self.logfire = LogfireConfig(
-                    service_name="kraftbot-simplified",
-                    service_version="1.0.0"
+                    service_name="kraftbot-simplified", service_version="1.0.0"
                 )
             except Exception as e:
                 print(f"⚠️  Logfire initialization failed: {e}")
-        
+
         # Initialize MCP manager and load servers
         self.mcp_manager = MCPManager()
         self._initialize_mcp_servers()
-        
+
         # Configure the OpenRouter model
         self.model = OpenAIChatModel(
             model_name,
             provider=OpenRouterProvider(api_key=openrouter_api_key),
         )
-        
+
         # Use default system prompt if none provided
         if not system_prompt:
             system_prompt = """You are KraftBot, an elite fantasy football strategist for manager 718Rob in league 1266471057523490816.
@@ -69,15 +71,15 @@ Provide concise, actionable fantasy football advice including:
 - Risk assessment and contingency plans
 
 Format responses clearly with bullet points."""
-        
+
         # Create the simple agent with MCP tools
         self.agent = Agent(
             model=self.model,
             system_prompt=system_prompt,
             toolsets=self.mcp_manager.get_servers(),
-            retries=0
+            retries=0,
         )
-    
+
     def _initialize_mcp_servers(self):
         """Initialize MCP servers based on configuration"""
         if settings.enable_mcp_server:
@@ -86,15 +88,19 @@ Format responses clearly with bullet points."""
                 self.mcp_manager.add_sse_server(
                     url="https://tokenbowl-mcp.haihai.ai/sse",
                     tool_prefix="tokenbowl",
-                    name="tokenbowl_mcp"
+                    name="tokenbowl_mcp",
                 )
                 if settings.verbose_logging:
-                    print(f"✅ Loaded MCP SSE server: tokenbowl-mcp at https://tokenbowl-mcp.haihai.ai/sse")
+                    print(
+                        f"✅ Loaded MCP SSE server: tokenbowl-mcp at https://tokenbowl-mcp.haihai.ai/sse"
+                    )
             except Exception as e:
                 if settings.verbose_logging:
                     print(f"⚠️  Failed to load MCP server: {e}")
-    
-    async def run(self, prompt: str, user_id: str = "user", session_id: str = "default") -> AgentResponse:
+
+    async def run(
+        self, prompt: str, user_id: str = "user", session_id: str = "default"
+    ) -> AgentResponse:
         """
         Run the agent with a given prompt - let Logfire handle all observability automatically
         """
@@ -120,7 +126,9 @@ Format responses clearly with bullet points."""
 
             return AgentResponse(response=f"Error: {error_msg}")
 
-    async def run_stream(self, prompt: str, user_id: str = "user", session_id: str = "default"):
+    async def run_stream(
+        self, prompt: str, user_id: str = "user", session_id: str = "default"
+    ):
         """
         Run the agent with streaming output
         """
