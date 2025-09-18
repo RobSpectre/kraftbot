@@ -38,10 +38,10 @@ def print_banner():
         Align.center(
             Text(banner, style="bold magenta")
             + Text(
-                "\n🤖 Advanced PydanticAI Agent with OpenRouter & MCP\n",
+                "\n🏈 Fantasy Football Management Agent\n",
                 style="bold cyan",
             )
-            + Text("Powered by OpenAI, Anthropic, Meta, and more!", style="dim")
+            + Text("Powered by AI insights for dominating your league!", style="dim")
         ),
         border_style="bright_blue",
         box=rich.box.DOUBLE_EDGE,

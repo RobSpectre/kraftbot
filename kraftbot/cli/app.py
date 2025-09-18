@@ -13,8 +13,8 @@ def create_app() -> typer.Typer:
 
     app = typer.Typer(
         name="kraftbot",
-        help="🚀 KraftBot - Advanced PydanticAI Agent with OpenRouter & MCP Support",
-        epilog="Built with ❤️  using PydanticAI, OpenRouter, and MCP",
+        help="🏈 KraftBot - Fantasy Football Management Agent with AI-powered insights",
+        epilog="Built with ❤️  for fantasy football managers who want to dominate their leagues",
         rich_markup_mode="rich",
         add_completion=False,
         no_args_is_help=True,

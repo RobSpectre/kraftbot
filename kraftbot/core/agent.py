@@ -62,10 +62,10 @@ class PydanticAIAgent:
 
         # Use default system prompt if none provided
         if not system_prompt:
-            system_prompt = """You are KraftBot, an elite fantasy football strategist for manager 718Rob in league 1266471057523490816.
-            
+            system_prompt = f"""You are KraftBot, an elite fantasy football strategist for manager {settings.default_manager_name} in league {settings.default_league_id}.
+
 Provide concise, actionable fantasy football advice including:
-- Lineup recommendations with justifications  
+- Lineup recommendations with justifications
 - Injury updates and their impact
 - Matchup analysis for key players
 - Risk assessment and contingency plans

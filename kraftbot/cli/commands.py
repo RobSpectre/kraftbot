@@ -61,13 +61,19 @@ async def display_streaming_response(
 
                 # Display current markdown content
                 markdown_content = Markdown(accumulated_text)
+                elapsed_time = time.time() - start_time
                 panel = Panel(
                     markdown_content,
-                    title=f"Response ({time.time() - start_time:.1f}s)",
+                    title=f"Response ({elapsed_time:.1f}s)",
                     border_style="green",
                     padding=(0, 1),
                 )
                 live.update(panel)
+
+                # Timeout protection
+                if elapsed_time > settings.request_timeout:
+                    console.print(f"\n⏰ [yellow]Response timeout after {settings.request_timeout}s[/yellow]")
+                    break
 
         except Exception as e:
             console.print(f"❌ [red]Streaming error: {e}[/red]")
