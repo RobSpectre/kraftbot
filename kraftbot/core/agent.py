@@ -80,6 +80,13 @@ Format responses clearly with bullet points."""
             retries=0,
         )
 
+        # Create a streaming-only agent without tools to avoid MCP streaming issues
+        self.streaming_agent = Agent(
+            model=self.model,
+            system_prompt=system_prompt,
+            retries=0,
+        )
+
     def _initialize_mcp_servers(self):
         """Initialize MCP servers based on configuration"""
         if settings.enable_mcp_server:
@@ -130,12 +137,12 @@ Format responses clearly with bullet points."""
         self, prompt: str, user_id: str = "user", session_id: str = "default"
     ):
         """
-        Run the agent with streaming output
+        Run the agent with streaming output (uses streaming-only agent without MCP tools)
         """
         try:
-            # Use the correct PydanticAI streaming API
-            async with self.agent.run_stream(prompt) as result:
-                async for chunk in result.stream():
+            # Use the streaming agent without MCP tools to avoid streaming issues
+            async with self.streaming_agent.run_stream(prompt) as result:
+                async for chunk in result.stream_output():
                     yield str(chunk)
         except Exception as e:
             # Provide more helpful error messages
