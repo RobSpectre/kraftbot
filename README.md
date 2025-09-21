@@ -4,419 +4,230 @@
 [![codecov](https://codecov.io/gh/RobSpectre/kraftbot/branch/main/graph/badge.svg)](https://codecov.io/gh/RobSpectre/kraftbot)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 A specialized AI agent for managing fantasy football teams, built with PydanticAI and integrated with Sleeper API via MCP (Model Context Protocol). KraftBot provides intelligent lineup optimization, waiver wire analysis, trade recommendations, and strategic guidance for your fantasy football league.
 
 ## ✨ Features
 
-- **🎯 Beautiful CLI**: Built with Typer and Rich for maximum visual appeal
-- **🤖 OpenRouter Integration**: Access multiple LLM providers through OpenRouter's unified API
-- **🔌 MCP Server Support**: Connect to external tools and services via MCP servers
-- **📊 Logfire Observability**: Full instrumentation with Logfire for monitoring and debugging
-- **🔒 Type Safety**: Structured responses using Pydantic models
-- **🛠️ Tool System**: Built-in tools with support for external MCP tools
-- **📝 Custom System Prompts**: Load specialized prompts from Markdown files
-- **⚡ Async Support**: Full asynchronous operation for better performance
-- **🎨 Rich Formatting**: Beautiful tables, progress bars, and animations
+- **🏆 Fantasy Football Expertise**: Specialized AI agent trained for fantasy football strategy and analysis
+- **📊 Sleeper Integration**: Direct access to your Sleeper league data via MCP server
+- **🎯 Multiple Strategy Modes**: Choose from aggressive, conservative, analytical, or default approaches
+- **💡 Intelligent Recommendations**: Lineup optimization, waiver pickups, and trade analysis
+- **🎨 Beautiful CLI**: Built with Typer and Rich for an excellent command-line experience
+- **🤖 Multi-Model Support**: Access multiple LLMs through OpenRouter integration
+- **📈 Season-Long Strategy**: Balance weekly wins with long-term championship goals
 
-## 📦 Installation
+## 🚀 Quick Start
 
-### Option 1: Install from source
+### Installation
+
+1. **Clone the repository**:
 ```bash
-git clone https://github.com/example/kraftbot.git
+git clone https://github.com/your-username/kraftbot.git
 cd kraftbot
-make install-dev  # or pip install -e .
 ```
 
-### Option 2: Install from PyPI (when published)
+2. **Install dependencies**:
 ```bash
-pip install kraftbot
-```
-
-### Option 3: Development Installation  
-```bash
-git clone https://github.com/example/kraftbot.git
-cd kraftbot
 make install-dev
 ```
 
-## 🔧 Configuration
-
-Set your environment variables:
-```bash
-export OPENROUTER_API_KEY="your-api-key-here"
-export LOGFIRE_WRITE_TOKEN="your-logfire-token"  # Optional but recommended
-```
-
-Or create a `.env` file (copy from `.env.example`):
+3. **Set up environment variables**:
 ```bash
 cp .env.example .env
 # Edit .env with your API keys
 ```
 
-## 🎯 CLI Usage
+Required environment variables:
+- `OPENROUTER_API_KEY` - Get from [OpenRouter](https://openrouter.ai/)
+- `LOGFIRE_WRITE_TOKEN` - Optional, for observability
 
-### Interactive Chat
-Start a beautiful interactive chat session:
+### Basic Usage
+
+**Start an interactive chat session**:
 ```bash
-kraftbot chat
-# or: python main.py chat
-# or: make cli-chat
+python main.py chat
 ```
 
-With custom model:
+**Test with a specific prompt**:
 ```bash
-kraftbot chat --model "openai/gpt-4"
+python main.py test --prompt "Analyze my Week 1 lineup"
 ```
 
-### List Available Models
-See all available models and their capabilities:
+**List available models**:
 ```bash
-kraftbot models
-# or: make cli-models
+python main.py models
 ```
 
-### Test a Model
-Quick test with any model:
+**Check system status**:
 ```bash
-kraftbot test --model "anthropic/claude-3.5-sonnet" --prompt "Hello, world!"
+python main.py status
 ```
 
-### Compare Models
-Compare responses across multiple models:
+## 🎯 Strategy Modes
+
+KraftBot supports multiple fantasy football strategy approaches via built-in prompt files:
+
+### Available Strategies
+
+- **`default`** - Balanced approach for optimal weekly and season-long performance
+- **`aggressive`** - High-risk, high-reward strategy for championship runs
+- **`conservative`** - Safe, consistent approach to avoid busts
+- **`analytical`** - Data-driven decisions based on advanced metrics
+
+### Using Strategy Modes
+
 ```bash
-kraftbot compare --prompt "Explain quantum computing" --model "anthropic/claude-3.5-sonnet" --model "openai/gpt-4"
+# Use a specific strategy
+python main.py chat --prompt aggressive
+python main.py chat --prompt conservative
+python main.py chat --prompt analytical
+
+# List all available prompts
+python main.py prompts
+
+# Test with custom strategy
+python main.py test --system-prompt aggressive --prompt "Should I start Ja'Marr Chase this week?"
 ```
 
-### MCP Information
-Learn about MCP integration:
+### Custom Strategies
+
+Create your own strategy by adding a `.md` file to `kraftbot/prompts/` or use any external file:
+
 ```bash
-kraftbot mcp
+# Use custom prompt file
+python main.py chat --prompt /path/to/my_strategy.md
 ```
 
-### System Status
-Check system configuration and environment:
+## 🔌 Sleeper Integration
+
+KraftBot automatically connects to a Sleeper MCP server to access your fantasy football data:
+
+- **League Information**: Rosters, matchups, standings
+- **Player Data**: Stats, projections, availability
+- **Waiver Wire**: Available free agents and their potential
+- **Trade Analysis**: Evaluate potential trades with other managers
+
+The MCP integration is enabled by default. To disable:
 ```bash
-kraftbot status
-# or: make cli-status
+ENABLE_MCP_SERVER=false python main.py chat
 ```
 
-### 📝 System Prompt Management
-Manage custom system prompts from Markdown files:
+## 📋 CLI Commands
 
-#### List Available Prompts
+| Command | Description | Example |
+|---------|-------------|---------|
+| `chat` | Interactive chat session | `python main.py chat --prompt aggressive` |
+| `test` | Test a specific prompt | `python main.py test --prompt "Analyze my lineup"` |
+| `models` | List available AI models | `python main.py models` |
+| `prompts` | Show available strategy prompts | `python main.py prompts` |
+| `status` | System configuration status | `python main.py status` |
+| `compare` | Compare responses across models | `python main.py compare --prompt "Trade advice"` |
+| `mcp` | MCP integration information | `python main.py mcp` |
+
+## 🎮 Example Usage
+
+### Weekly Lineup Analysis
 ```bash
-kraftbot prompts
+python main.py chat --prompt analytical
+# Then ask: "Should I start Justin Jefferson or Tyreek Hill this week?"
 ```
 
-#### Create a New Prompt
+### Waiver Wire Strategy
 ```bash
-kraftbot create-prompt my_prompt --template coding
-# Templates: default, coding, creative, analytical
+python main.py test --prompt "Who should I pick up from waivers this week?"
 ```
 
-#### Show Prompt Contents
-```bash  
-kraftbot show-prompt coding_assistant
-```
-
-#### Use Custom Prompt in Chat
+### Trade Evaluation
 ```bash
-kraftbot chat --prompt-file coding_assistant
-# or: kraftbot test --prompt-file data_analyst --prompt "Analyze this data"
+python main.py chat --prompt conservative
+# Then ask: "Should I trade my RB1 for two WR2s?"
 ```
 
-#### Validate All Prompts
+### Multi-Model Comparison
 ```bash
-kraftbot validate-prompts
+python main.py compare --prompt "Rank my RBs for this week" --model "anthropic/claude-3.5-sonnet" --model "openai/gpt-4"
 ```
 
-## 📚 Programmatic Usage
+## ⚙️ Configuration
 
-```python
-import asyncio
-from kraftbot import PydanticAIAgent
+### Environment Variables
 
-async def main():
-    # Create agent with custom system prompt from file
-    agent = PydanticAIAgent(
-        openrouter_api_key="your-api-key",
-        model_name="anthropic/claude-3.5-sonnet",
-        enable_logfire=True,  # Uses LOGFIRE_WRITE_TOKEN env var
-        system_prompt_file="coding_assistant"  # Load from markdown file
-    )
-    
-    # Or use explicit system prompt
-    agent_explicit = PydanticAIAgent(
-        openrouter_api_key="your-api-key",
-        model_name="openai/gpt-4",
-        system_prompt="You are a helpful coding assistant..."
-    )
-    
-    # Run a query
-    response = await agent.run(
-        prompt="Help me optimize this Python function",
-        user_id="user123",
-        session_id="session1"
-    )
-    
-    print(f"Response: {response.response}")
-    print(f"Confidence: {response.confidence}")
-    print(f"Tools used: {response.tools_used}")
-    print(f"Response time: {response.response_time}s")
+Create a `.env` file with:
+```bash
+# Required
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 
-if __name__ == "__main__":
-    asyncio.run(main())
+# Optional
+LOGFIRE_WRITE_TOKEN=your_logfire_token
+ENABLE_MCP_SERVER=true
+MCP_SERVER_COMMAND=python
+MCP_SERVER_ARGS=-m sleeper_mcp_server
 ```
 
-### Adding MCP Servers
+### Available Models
 
-#### STDIO Server (e.g., MCP Run Python)
-```python
-# Add Python execution server
-agent.add_mcp_server_stdio(
-    'deno',
-    [
-        'run',
-        '-N', '-R=node_modules', '-W=node_modules', '--node-modules-dir=auto',
-        'jsr:@pydantic/mcp-run-python',
-        'stdio'
-    ],
-    tool_prefix='python',
-    name='python_executor'
-)
-```
+Popular models for fantasy football analysis:
+- `anthropic/claude-3.5-sonnet` (Recommended for detailed analysis)
+- `openai/gpt-4` (Great for strategic thinking)
+- `openai/gpt-4-turbo` (Fast responses)
+- `meta-llama/llama-3.1-70b-instruct` (Alternative option)
 
-#### SSE Server
-```python  
-# Add weather service server
-agent.add_mcp_server_sse(
-    url='http://localhost:3001/sse',
-    tool_prefix='weather',
-    name='weather_service'
-)
-```
-
-## Available Models
-
-You can use any model available through OpenRouter. Popular options include:
-
-- `anthropic/claude-3.5-sonnet`
-- `openai/gpt-4`
-- `openai/gpt-4-turbo`
-- `meta-llama/llama-3.1-70b-instruct`
-- `google/gemini-pro`
-
-## Response Structure
-
-The agent returns structured responses with the following fields:
-
-```python
-class AgentResponse(BaseModel):
-    response: str              # Main response text
-    confidence: float          # Confidence level (0.0-1.0)
-    tools_used: List[str]      # Tools that were used
-    metadata: Dict[str, Any]   # Additional metadata
-```
-
-## Built-in Tools
-
-The agent comes with several built-in tools:
-
-- **get_user_context**: Retrieves user and session information
-- **calculate**: Performs basic mathematical calculations
-
-## MCP Server Integration
-
-The Model Context Protocol (MCP) allows the agent to connect to external services and tools. Common MCP servers include:
-
-- **MCP Run Python**: Execute Python code in a sandboxed environment
-- **Weather Services**: Get weather information
-- **Database Connectors**: Query databases
-- **Web Search**: Search the internet
-- **File Operations**: Read and write files
-
-## Example: Complete Setup
-
-```python
-#!/usr/bin/env python3
-import asyncio
-import os
-from pydantic_ai_agent import PydanticAIWithOpenRouterMCP
-
-async def main():
-    # Initialize agent
-    agent = PydanticAIWithOpenRouterMCP(
-        openrouter_api_key=os.getenv("OPENROUTER_API_KEY"),
-        model_name="anthropic/claude-3.5-sonnet"
-    )
-    
-    # Add MCP servers if available
-    # agent.add_mcp_server_stdio('python', ['mcp_python_server.py'])
-    
-    # Interactive loop
-    while True:
-        user_input = input("You: ")
-        if user_input.lower() in ['quit', 'exit']:
-            break
-            
-        response = await agent.run(
-            prompt=user_input,
-            user_id="interactive_user",
-            session_id="cli_session"
-        )
-        
-        print(f"Agent: {response.response}")
-        if response.confidence < 0.7:
-            print(f"(Low confidence: {response.confidence:.2f})")
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-## 🔧 Environment Variables
-
-- `OPENROUTER_API_KEY`: Your OpenRouter API key (required)
-- `LOGFIRE_WRITE_TOKEN`: Your Logfire token for observability (optional but highly recommended)
-
-## 🎨 CLI Features
-
-The CLI includes many visual enhancements:
-
-- **🌈 Rich formatting**: Beautiful tables, panels, and syntax highlighting
-- **⏳ Loading animations**: Smooth spinners and progress bars
-- **📊 Real-time metrics**: Response times, confidence scores, and tool usage
-- **🎯 Interactive prompts**: User-friendly input with auto-completion
-- **📱 Responsive design**: Adapts to different terminal sizes
-- **🔍 Environment checking**: Automatic validation of API keys and configuration
-
-## 📊 Logfire Integration
-
-When `LOGFIRE_WRITE_TOKEN` is set, KraftBot automatically:
-
-- **📈 Instruments PydanticAI**: Tracks all agent interactions and tool calls
-- **🔌 Monitors MCP servers**: Logs server connections and tool executions  
-- **⏱️ Records timing**: Measures response times and performance metrics
-- **🐛 Captures errors**: Detailed error logging for debugging
-- **📋 Tracks usage**: Token consumption and API call statistics
-
-Access your logs at: https://logfire.pydantic.dev/
-
-## Error Handling
-
-The agent includes comprehensive error handling for:
-- API connection issues
-- Invalid model names
-- MCP server connection failures
-- Tool execution errors
+View all available models: `python main.py models`
 
 ## 🛠️ Development
 
-### Quick Start
+### Development Commands
+
 ```bash
-git clone https://github.com/example/kraftbot.git
-cd kraftbot
-make install-dev
+make install-dev     # Install with dev dependencies
+make test           # Run tests
+make test-coverage  # Run tests with coverage
+make lint           # Run linting (black, isort, mypy)
+make format         # Format code
+make clean          # Clean build artifacts
+make build          # Build package
 ```
 
-### Available Commands
-```bash
-make help                 # Show all available commands
-make install             # Install package
-make install-dev         # Install with development dependencies  
-make test                # Run tests
-make test-coverage       # Run tests with coverage
-make lint                # Run linting
-make format              # Format code
-make clean               # Clean build artifacts
-make build               # Build package
-make run-examples        # Run example scripts
-```
+### Project Structure
 
-### Running Examples
-```bash
-# Run all examples
-make run-examples
-
-# Or run individually
-python kraftbot/examples/basic_usage.py
-python kraftbot/examples/mcp_integration.py
-python kraftbot/examples/model_comparison.py
-```
-
-### Running Tests
-```bash
-# Run all tests
-make test
-
-# Run with coverage
-make test-coverage
-
-# Run specific test file
-pytest kraftbot/tests/test_agent.py -v
-```
-
-### Module Structure
 ```
 kraftbot/
-├── __init__.py              # Main package exports
-├── core/                    # Core agent functionality
-│   ├── agent.py            # Main PydanticAIAgent class
-│   ├── models.py           # Pydantic data models
-│   └── observability.py    # Logfire integration
-├── cli/                     # CLI interface
-│   ├── app.py              # Main CLI application
-│   ├── commands.py         # CLI command implementations
-│   └── utils.py            # CLI utilities and formatting
-├── mcp/                     # MCP integration
-│   ├── manager.py          # MCP server manager
-│   └── servers.py          # MCP server configurations
-├── config/                  # Configuration management
-│   └── settings.py         # Settings and environment handling
-├── utils/                   # General utilities
-│   └── helpers.py          # Helper functions
-├── tests/                   # Test suite
-├── examples/               # Example scripts
-└── ...
+├── kraftbot/
+│   ├── core/           # Core agent functionality
+│   ├── cli/            # Command-line interface
+│   ├── mcp/            # Sleeper MCP integration
+│   ├── prompts/        # Fantasy football strategy prompts
+│   ├── config/         # Configuration management
+│   └── utils/          # Utility functions
+├── main.py             # CLI entry point
+└── pyproject.toml      # Project configuration
 ```
 
-### Extending KraftBot
+## 🎯 What KraftBot Can Help With
 
-1. **Add new tools**:
-```python
-@agent.tool
-async def my_custom_tool(ctx: RunContext[AgentDependencies], param: str) -> str:
-    """Custom tool description"""
-    return f"Processed: {param}"
-```
+- **Weekly Lineup Decisions**: Start/sit recommendations based on matchups and projections
+- **Waiver Wire Strategy**: Identify valuable pickups before others notice
+- **Trade Analysis**: Evaluate trade proposals and find win-win deals
+- **Season Planning**: Balance short-term gains with championship strategy
+- **Matchup Analysis**: Understand opponent weaknesses and exploit them
+- **Player Evaluation**: Deep dives into player performance and trends
+- **League Strategy**: Adapt tactics based on your league's scoring and tendencies
 
-2. **Add new MCP servers**:
-```python
-agent.add_mcp_server_stdio('my_server', ['my_command', 'args'])
-```
+## 📈 Fantasy Football Expertise
 
-3. **Extend response models**:
-```python
-class CustomAgentResponse(AgentResponse):
-    custom_field: str = Field(description="Custom field")
-```
+KraftBot's default behavior is optimized for fantasy football management with knowledge of:
 
-4. **Add new CLI commands**:
-```python
-@app.command()
-def my_command():
-    """My custom command"""
-    pass
-```
-
-## 🧪 Testing
-
-The project includes comprehensive tests covering:
-- Core agent functionality
-- MCP server management  
-- Configuration handling
-- CLI interface components
+- **Scoring Systems**: PPR, Half-PPR, Standard scoring
+- **Positional Strategy**: RB scarcity, WR depth, streaming strategies
+- **Matchup Analysis**: Vegas lines, pace of play, weather conditions
+- **Player Health**: Injury reports and their fantasy implications
+- **Advanced Metrics**: Target share, red zone usage, snap counts
+- **Season Trends**: Strength of schedule, playoff implications
 
 ## 📄 License
 
-This project is provided as an example and educational resource under the MIT License.
+MIT License - See LICENSE file for details.
+
+---
+
+**Built for fantasy football managers who want to dominate their leagues with AI-powered insights.**
