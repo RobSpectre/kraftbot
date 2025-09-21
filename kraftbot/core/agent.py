@@ -133,9 +133,10 @@ Format responses clearly with bullet points."""
         Run the agent with streaming output
         """
         try:
-            async with self.agent.run_stream(prompt) as stream:
-                async for token in stream:
-                    yield token
+            # Use the correct PydanticAI streaming API
+            async with self.agent.run_stream(prompt) as result:
+                async for chunk in result.stream():
+                    yield str(chunk)
         except Exception as e:
             # Provide more helpful error messages
             error_msg = str(e)

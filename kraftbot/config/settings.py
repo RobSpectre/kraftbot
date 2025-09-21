@@ -58,12 +58,8 @@ class Settings(BaseSettings):
     )
 
     # Fantasy Football Configuration
-    default_league_id: str = Field(
-        "1266471057523490816", env="FANTASY_LEAGUE_ID"
-    )
-    default_manager_name: str = Field(
-        "718Rob", env="FANTASY_MANAGER_NAME"
-    )
+    default_league_id: str = Field("1266471057523490816", env="FANTASY_LEAGUE_ID")
+    default_manager_name: str = Field("718Rob", env="FANTASY_MANAGER_NAME")
 
     # MCP Server Configuration
     mcp_server_command: str = Field("python", env="MCP_SERVER_COMMAND")

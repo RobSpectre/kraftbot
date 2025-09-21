@@ -7,8 +7,8 @@ import time
 from typing import List, Optional
 
 import typer
-from prompt_toolkit import prompt
 from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.shortcuts import PromptSession
 from prompt_toolkit.styles import Style
 from rich.markdown import Markdown
 from rich.panel import Panel
@@ -50,17 +50,16 @@ async def display_streaming_response(
     from rich.markdown import Markdown
     from rich.panel import Panel
 
-    accumulated_text = ""
-
     console.print("🧠 [cyan]KraftBot:[/cyan]")
 
     with Live(refresh_per_second=10, console=console) as live:
         try:
             async for token in agent.run_stream(user_input, user_id, session_id):
-                accumulated_text += str(token)
+                # Each token is the full response up to that point, not incremental
+                current_text = str(token)
 
                 # Display current markdown content
-                markdown_content = Markdown(accumulated_text)
+                markdown_content = Markdown(current_text)
                 elapsed_time = time.time() - start_time
                 panel = Panel(
                     markdown_content,
@@ -72,7 +71,9 @@ async def display_streaming_response(
 
                 # Timeout protection
                 if elapsed_time > settings.request_timeout:
-                    console.print(f"\n⏰ [yellow]Response timeout after {settings.request_timeout}s[/yellow]")
+                    console.print(
+                        f"\n⏰ [yellow]Response timeout after {settings.request_timeout}s[/yellow]"
+                    )
                     break
 
         except Exception as e:
@@ -178,7 +179,7 @@ async def chat_async(
         raise typer.Exit(1)
 
     # Initialize agent
-    if not asyncio.run(initialize_agent(model, prompt)):
+    if not await initialize_agent(model, prompt):
         raise typer.Exit(1)
 
     console.print(Rule("🎯 Interactive Chat Mode", style="bright_cyan"))
@@ -189,8 +190,9 @@ async def chat_async(
     message_count = 0
     user_id = user_id or settings.default_user_id
 
-    # Create command history
+    # Create command history and prompt session
     history = InMemoryHistory()
+    session = PromptSession(history=history)
 
     # Define style for prompt
     prompt_style = Style.from_dict(
@@ -204,9 +206,10 @@ async def chat_async(
         while True:
             # Interactive prompt with history support
             try:
-                user_input = prompt(
-                    f"You ({message_count + 1}): ", history=history, style=prompt_style
-                ).strip()
+                user_input = await session.prompt_async(
+                    f"You ({message_count + 1}): ", style=prompt_style
+                )
+                user_input = user_input.strip()
             except EOFError:
                 # Handle Ctrl+D
                 console.print(
