@@ -1,5 +1,9 @@
 # 🏈 KraftBot - Fantasy Football Management Agent
 
+[![CI](https://github.com/RobSpectre/kraftbot/actions/workflows/ci.yml/badge.svg)](https://github.com/RobSpectre/kraftbot/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/RobSpectre/kraftbot/branch/main/graph/badge.svg)](https://codecov.io/gh/RobSpectre/kraftbot)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 A specialized AI agent for managing fantasy football teams, built with PydanticAI and integrated with Sleeper API via MCP (Model Context Protocol). KraftBot provides intelligent lineup optimization, waiver wire analysis, trade recommendations, and strategic guidance for your fantasy football league.
 
 ## ✨ Features

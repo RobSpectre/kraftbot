@@ -9,13 +9,13 @@ __version__ = "1.0.0"
 __author__ = "KraftBot Team"
 __email__ = "kraftbot@example.com"
 
-from .core.agent import PydanticAIAgent
-from .core.models import AgentResponse, AgentDependencies
 from .config.settings import Settings
+from .core.agent import PydanticAIAgent
+from .core.models import AgentDependencies, AgentResponse
 
 __all__ = [
     "PydanticAIAgent",
-    "AgentResponse", 
+    "AgentResponse",
     "AgentDependencies",
     "Settings",
     "__version__",

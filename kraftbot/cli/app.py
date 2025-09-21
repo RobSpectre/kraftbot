@@ -4,38 +4,38 @@ Main CLI application setup for KraftBot.
 
 import typer
 
-from .commands import chat, models, test, compare, mcp_info, status, prompts
+from .commands import chat, compare, mcp_info, models, prompts, status, test
 from .utils import console
 
 
 def create_app() -> typer.Typer:
     """Create and configure the main CLI application"""
-    
+
     app = typer.Typer(
         name="kraftbot",
-        help="🚀 KraftBot - Advanced PydanticAI Agent with OpenRouter & MCP Support",
-        epilog="Built with ❤️  using PydanticAI, OpenRouter, and MCP",
+        help="🏈 KraftBot - Fantasy Football Management Agent with AI-powered insights",
+        epilog="Built with ❤️  for fantasy football managers who want to dominate their leagues",
         rich_markup_mode="rich",
         add_completion=False,
-        no_args_is_help=True
+        no_args_is_help=True,
     )
-    
+
     # Register commands
     app.command(name="chat")(chat)
-    app.command(name="models")(models) 
+    app.command(name="models")(models)
     app.command(name="test")(test)
     app.command(name="compare")(compare)
     app.command(name="mcp")(mcp_info)
     app.command(name="status")(status)
     app.command(name="prompts")(prompts)
-    
+
     return app
 
 
 def main():
     """Main entry point for the CLI"""
     app = create_app()
-    
+
     try:
         app()
     except KeyboardInterrupt:

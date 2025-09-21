@@ -11,10 +11,11 @@ from pydantic import BaseModel, Field
 @dataclass
 class AgentDependencies:
     """Dependencies for the agent - can include database connections, API clients, etc."""
+
     user_id: str
     session_id: str
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -22,4 +23,5 @@ class AgentDependencies:
 
 class AgentResponse(BaseModel):
     """Simplified response from the agent - let Logfire handle all observability"""
+
     response: str = Field(description="The main response to the user")

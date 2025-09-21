@@ -11,29 +11,31 @@ from pydantic import BaseModel
 
 class MCPTransportType(str, Enum):
     """MCP server transport types"""
+
     STDIO = "stdio"
-    SSE = "sse" 
+    SSE = "sse"
     HTTP = "http"
 
 
 @dataclass
 class MCPServerConfig:
     """Configuration for an MCP server"""
+
     name: str
     transport_type: MCPTransportType
     tool_prefix: Optional[str] = None
-    
+
     # STDIO specific
     command: Optional[str] = None
     args: Optional[List[str]] = None
-    
-    # HTTP/SSE specific  
+
+    # HTTP/SSE specific
     url: Optional[str] = None
-    
+
     # Additional options
     timeout: int = 30
     allow_sampling: bool = True
-    
+
     def __post_init__(self):
         """Validate configuration after initialization"""
         if self.transport_type == MCPTransportType.STDIO:
@@ -46,6 +48,7 @@ class MCPServerConfig:
 
 class MCPServerInfo(BaseModel):
     """Information about a connected MCP server"""
+
     name: str
     transport_type: str
     tool_prefix: Optional[str]
@@ -53,7 +56,8 @@ class MCPServerInfo(BaseModel):
     tools_count: int
     last_used: Optional[str] = None
     error_message: Optional[str] = None
-    
+
     class Config:
         """Pydantic configuration"""
+
         use_enum_values = True
