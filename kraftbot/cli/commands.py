@@ -52,11 +52,17 @@ async def display_streaming_response(
 
     console.print("🧠 [cyan]KraftBot:[/cyan]")
 
+    # Try streaming first, but be ready to fallback to non-streaming
+    streaming_worked = False
+    last_response = ""
+
     with Live(refresh_per_second=10, console=console) as live:
         try:
+            chunk_count = 0
             async for token in agent.run_stream(user_input, user_id, session_id):
-                # Each token is the full response up to that point, not incremental
+                chunk_count += 1
                 current_text = str(token)
+                last_response = current_text
 
                 # Display current markdown content
                 markdown_content = Markdown(current_text)
@@ -69,6 +75,10 @@ async def display_streaming_response(
                 )
                 live.update(panel)
 
+                # If we get multiple chunks, streaming is working
+                if chunk_count > 3:
+                    streaming_worked = True
+
                 # Timeout protection
                 if elapsed_time > settings.request_timeout:
                     console.print(
@@ -78,12 +88,15 @@ async def display_streaming_response(
 
         except Exception as e:
             console.print(f"❌ [red]Streaming error: {e}[/red]")
-            # Fallback to non-streaming
-            try:
-                response = await agent.run(user_input, user_id, session_id)
-                display_response(response, time.time() - start_time)
-            except Exception as fallback_error:
-                console.print(f"❌ [red]Fallback error: {fallback_error}[/red]")
+
+    # If streaming didn't work well (too few chunks or short response), try non-streaming
+    if not streaming_worked or len(last_response) < 200:
+        console.print("🔄 [yellow]Switching to non-streaming mode for better response...[/yellow]")
+        try:
+            response = await agent.run(user_input, user_id, session_id)
+            display_response(response, time.time() - start_time)
+        except Exception as fallback_error:
+            console.print(f"❌ [red]Fallback error: {fallback_error}[/red]")
 
 
 async def initialize_agent(model: str = None, prompt: str = None) -> bool:

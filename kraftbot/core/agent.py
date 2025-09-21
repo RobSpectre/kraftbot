@@ -80,13 +80,6 @@ Format responses clearly with bullet points."""
             retries=0,
         )
 
-        # Create a streaming-only agent without tools to avoid MCP streaming issues
-        self.streaming_agent = Agent(
-            model=self.model,
-            system_prompt=system_prompt,
-            retries=0,
-        )
-
     def _initialize_mcp_servers(self):
         """Initialize MCP servers based on configuration"""
         if settings.enable_mcp_server:
@@ -137,13 +130,27 @@ Format responses clearly with bullet points."""
         self, prompt: str, user_id: str = "user", session_id: str = "default"
     ):
         """
-        Run the agent with streaming output (uses streaming-only agent without MCP tools)
+        Run the agent with streaming output
         """
         try:
-            # Use the streaming agent without MCP tools to avoid streaming issues
-            async with self.streaming_agent.run_stream(prompt) as result:
+            # Use the main agent with MCP tools and handle streaming carefully
+            async with self.agent.run_stream(prompt) as result:
+                # Monitor for complete response by checking final result
+                full_response = ""
                 async for chunk in result.stream_output():
-                    yield str(chunk)
+                    chunk_text = str(chunk)
+                    full_response = chunk_text  # Each chunk contains full response up to that point
+                    yield chunk_text
+
+                # If response seems incomplete, try to get final result
+                if len(full_response) < 200:  # Threshold for "too short"
+                    try:
+                        final_result = result.data
+                        if final_result and len(str(final_result)) > len(full_response):
+                            yield str(final_result)
+                    except:
+                        pass  # Continue with what we have
+
         except Exception as e:
             # Provide more helpful error messages
             error_msg = str(e)
