@@ -91,7 +91,9 @@ async def display_streaming_response(
 
     # If streaming didn't work well (too few chunks or short response), try non-streaming
     if not streaming_worked or len(last_response) < 200:
-        console.print("🔄 [yellow]Switching to non-streaming mode for better response...[/yellow]")
+        console.print(
+            "🔄 [yellow]Switching to non-streaming mode for better response...[/yellow]"
+        )
         try:
             response = await agent.run(user_input, user_id, session_id)
             display_response(response, time.time() - start_time)

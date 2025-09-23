@@ -139,7 +139,9 @@ Format responses clearly with bullet points."""
                 full_response = ""
                 async for chunk in result.stream_output():
                     chunk_text = str(chunk)
-                    full_response = chunk_text  # Each chunk contains full response up to that point
+                    full_response = (
+                        chunk_text  # Each chunk contains full response up to that point
+                    )
                     yield chunk_text
 
                 # If response seems incomplete, try to get final result
