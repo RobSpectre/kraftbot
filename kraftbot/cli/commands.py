@@ -145,24 +145,14 @@ async def initialize_agent(model: str = None, prompt: str = None) -> bool:
     if settings.verbose_logging:
         model_config = settings.get_model_config(model_name)
         if model_config:
-            import rich.box
-            from rich.table import Table
-
-            model_info = Table(show_header=False, box=rich.box.ROUNDED)
-            model_info.add_column("Property", style="bold cyan")
-            model_info.add_column("Value", style="white")
-
-            model_info.add_row("🤖 Model", model_name)
-            model_info.add_row("🏢 Provider", model_config.provider)
-            model_info.add_row("🔌 Transport", "OpenRouter")
-            model_info.add_row(
-                "📊 Observability",
-                "Enabled" if settings.is_logfire_configured() else "Disabled",
-            )
-
+            console.print("\n### 🔧 Agent Configuration\n")
+            console.print(f"- **🤖 Model**: {model_name}")
+            console.print(f"- **🏢 Provider**: {model_config.provider}")
+            console.print(f"- **🔌 Transport**: OpenRouter")
             console.print(
-                Panel(model_info, title="🔧 Agent Configuration", border_style="green")
+                f"- **📊 Observability**: {'Enabled' if settings.is_logfire_configured() else 'Disabled'}"
             )
+            console.print()
 
     return True
 

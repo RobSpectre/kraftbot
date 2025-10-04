@@ -9,7 +9,6 @@ import rich.box
 from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 from rich.text import Text
 
 from ..config.settings import settings
@@ -52,18 +51,14 @@ def print_banner():
 
 def check_environment() -> bool:
     """Check and display environment status with style"""
-    console.print("\n🔍 [bold cyan]Environment Check[/bold cyan]")
-
-    status_table = Table(show_header=False, box=rich.box.SIMPLE, padding=(0, 2))
-    status_table.add_column("Service", style="bold")
-    status_table.add_column("Status", justify="center")
+    console.print("\n🔍 [bold cyan]Environment Check[/bold cyan]\n")
 
     env_status = settings.validate_environment()
 
     for service, info in env_status.items():
         service_name = service.replace("_", " ").title()
         status_text = info["status"]
-        status_table.add_row(service_name, status_text)
+        console.print(f"**{service_name}**: {status_text}")
 
     # Add Python version check
     import sys
@@ -76,9 +71,7 @@ def check_environment() -> bool:
         if sys.version_info >= (3, 9)
         else "❌ [red]Too Old[/red]"
     )
-    status_table.add_row("Python Version", f"{python_version} {python_status}")
-
-    console.print(Panel(status_table, title="🔧 System Status", border_style="blue"))
+    console.print(f"**Python Version**: {python_version} {python_status}\n")
 
     return settings.is_api_key_configured()
 
@@ -105,31 +98,19 @@ def display_response(response, thinking_time: float):
 
 
 def display_model_table():
-    """Display available models in a beautiful table"""
-    table = Table(
-        title="🤖 Available Models via OpenRouter",
-        box=rich.box.ROUNDED,
-        title_style="bold magenta",
-        header_style="bold cyan",
-    )
-
-    table.add_column("Model", style="bold white", width=35)
-    table.add_column("Provider", style="blue", width=12)
-    table.add_column("Strengths", style="green", width=25)
-    table.add_column("Speed", style="yellow", width=10)
-    table.add_column("Cost", style="red", width=10)
+    """Display available models in markdown format"""
+    console.print("\n## 🤖 Available Models via OpenRouter\n")
 
     for model_name, model_config in settings.available_models.items():
-        table.add_row(
-            model_name,
-            model_config.provider,
-            ", ".join(model_config.strengths[:3]),  # Limit to first 3 strengths
-            model_config.speed,
-            model_config.cost,
-        )
+        strengths = ", ".join(model_config.strengths[:3])
+        console.print(f"### {model_name}")
+        console.print(f"- **Provider**: {model_config.provider}")
+        console.print(f"- **Strengths**: {strengths}")
+        console.print(f"- **Speed**: {model_config.speed}")
+        console.print(f"- **Cost**: {model_config.cost}")
+        console.print()
 
-    console.print(table)
-    console.print("\n💡 [dim]Use --model flag to specify which model to use[/dim]")
+    console.print("💡 [dim]Use --model flag to specify which model to use[/dim]")
 
 
 def display_system_status():
@@ -140,21 +121,14 @@ def display_system_status():
     from pathlib import Path
 
     # System info
-    system_info = Table(title="🖥️  System Information", box=rich.box.ROUNDED)
-    system_info.add_column("Property", style="bold cyan")
-    system_info.add_column("Value", style="white")
-
-    system_info.add_row("Operating System", f"{platform.system()} {platform.release()}")
-    system_info.add_row("Python Version", f"{sys.version.split()[0]}")
-    system_info.add_row("Current Time", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    system_info.add_row("Working Directory", str(Path.cwd()))
-
-    console.print(system_info)
+    console.print("\n## 🖥️  System Information\n")
+    console.print(f"- **Operating System**: {platform.system()} {platform.release()}")
+    console.print(f"- **Python Version**: {sys.version.split()[0]}")
+    console.print(f"- **Current Time**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    console.print(f"- **Working Directory**: {Path.cwd()}")
 
     # Environment variables
-    env_info = Table(title="🔑 Environment Configuration", box=rich.box.ROUNDED)
-    env_info.add_column("Variable", style="bold cyan")
-    env_info.add_column("Status", style="white")
+    console.print("\n## 🔑 Environment Configuration\n")
 
     env_vars = [
         ("OPENROUTER_API_KEY", "OpenRouter API access"),
@@ -173,6 +147,4 @@ def display_system_status():
         else:
             status = "❌ Not set"
 
-        env_info.add_row(var_name, status)
-
-    console.print(env_info)
+        console.print(f"- **{var_name}**: {status}")
