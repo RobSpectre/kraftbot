@@ -1,0 +1,21 @@
+# Core dependencies
+langchain==0.3.14
+langchain-openai==0.2.14
+langchain-community==0.3.14
+langchain-mcp-adapters>=0.1.11
+openai>=1.58.1
+python-dotenv==1.0.1
+click==8.1.7
+rich==13.9.4
+tiktoken==0.8.0
+prompt-toolkit==3.0.48
+pyyaml==6.0.2
+httpx==0.28.1
+aiohttp==3.11.11
+mcp>=1.9.2
+
+# Development dependencies
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+pytest-mock==3.14.0

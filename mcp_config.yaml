@@ -1,0 +1,26 @@
+# MCP Server Configuration for Kraftbot
+# Model Context Protocol servers provide specialized tools to the agent
+
+servers:
+  # Tokenbowl MCP Server - Fantasy Football Data and Analysis Tools
+  tokenbowl:
+    enabled: true
+    type: sse  # Server-Sent Events transport
+    url: https://tokenbowl-mcp.haihai.ai/sse
+    tool_prefix: tokenbowl
+    description: Fantasy football data access for Sleeper leagues
+
+  # Add additional MCP servers here:
+  # example_server:
+  #   enabled: false
+  #   type: stdio  # Standard I/O transport
+  #   command: python
+  #   args: ["-m", "example_mcp_server"]
+  #   tool_prefix: example
+  #   description: Example MCP server
+
+# Global MCP settings
+global:
+  timeout: 300  # Timeout in seconds for MCP operations
+  enable_by_default: true  # Enable MCP servers by default
+  verbose_logging: false  # Enable verbose MCP logging
